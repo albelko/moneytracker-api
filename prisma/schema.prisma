@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AccountType {
+  CASH
+  BANK
+  CREDIT
+  INVESTMENT
+  CRYPTO
+  OTHER
+}
+
+enum TransactionType {
+  EXPENSE
+  INCOME
+  TRANSFER
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+
+  // Ownership
+  accounts     Account[]
+  categories   Category[]
+  payees       Payee[]
+  transactions Transaction[]
+
+  @@index([email])
+}
+
+model Account {
+  id             String      @id @default(uuid())
+  userId         String
+  name           String
+  type           AccountType @default(OTHER)
+  currency       String // ISO 4217 (e.g., "USD")
+  balanceInitial Decimal     @default(0)
+  isArchived     Boolean     @default(false)
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name]) // account name unique per user
+  @@index([userId])
+}
+
+model Category {
+  id         String  @id @default(uuid())
+  userId     String
+  name       String
+  isIncome   Boolean @default(false)
+  isArchived Boolean @default(false)
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name]) // category name unique per user
+  @@index([userId])
+}
+
+model Payee {
+  id     String  @id @default(uuid())
+  userId String
+  name   String
+  note   String?
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name]) // payee name unique per user
+  @@index([userId])
+}
+
+model Transaction {
+  id          String          @id @default(uuid())
+  userId      String
+  accountId   String
+  type        TransactionType
+  amount      Decimal
+  currency    String
+  occurredAt  DateTime
+  description String?
+  note        String?
+
+  categoryId String?
+  payeeId    String?
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account  Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  payee    Payee?    @relation(fields: [payeeId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, occurredAt])
+  @@index([accountId, occurredAt])
+  @@index([categoryId])
+  @@index([payeeId])
+}

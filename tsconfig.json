@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": ["node"],
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@/generated/*": ["generated/*"],
+      "@/*": ["src/*"],
+      "@/app/*": ["src/app/*"],
+      "@/app/plugins/*": ["src/app/plugins/*"],
+      "@/config/*": ["src/config/*"],
+      "@/modules/*": ["src/modules/*"],
+
+    }
+  },
+  "include": ["src", "prisma", "tests"]
+}
