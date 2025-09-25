@@ -1,4 +1,4 @@
-import { Prisma } from 'generated/prisma';
+import { Prisma } from '@/generated/prisma';
 import { CreateBody, UpdateBody } from './transactions.schemas';
 import { TransactionsRepository } from './transactions.repository';
 
